@@ -1,0 +1,16 @@
+# Loads key=value pairs from a .env file into os.environ
+python-dotenv
+
+# Google Gemini SDK - the free-tier provider we start with
+google-genai
+
+# Anthropic Claude SDK - optional paid provider, uncomment when you have credits
+# anthropic
+# Graph-based orchestration for multi-step agent workflows
+langgraph
+# Vector database - stores embeddings on disk and searches them by meaning
+chromadb
+
+# Extracts text from PDF files
+pypdf
+
