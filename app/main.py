@@ -7,8 +7,9 @@ from app.llm import LLMError
 from app.utils.config import ConfigError, get_settings
 
 QUESTION = (
-    "A SaaS company has 12,400 customers paying $49/month with 3.2% monthly "
-    "churn. What is the annual revenue impact of reducing churn to 2.1%?"
+    "For Orbitra Mobility, how much FY2026 capital expenditure is budgeted "
+    "per new scooter added to the fleet, and what is the biggest risk to "
+    "that expansion plan?"
 )
 
 
@@ -38,8 +39,23 @@ def main() -> None:
         print(f"\n[failed] {error}")
         return
 
+   # app/main.py
     print("\n=== FINAL REPORT ===\n")
     print(result["final_report"])
+
+    checks = result.get("fact_checks") or []
+    if checks:
+        supported = sum(1 for check in checks if check["verdict"] == "supported")
+        revisions = result.get("revisions", 0)
+        print(f"\n=== VERIFICATION ===\n")
+        print(f"{supported} of {len(checks)} claims supported after {revisions} revision(s).")
+
+        remaining = [check for check in checks if check["verdict"] != "supported"]
+        if remaining:
+            print("\nStill unresolved:")
+            for check in remaining:
+                print(f"  - [{check['verdict']}] {check['claim']}")
+                print(f"    {check['explanation']}")
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+# app/tools/__init__.py
 """Tool registry.
 
 Every tool the agent can use is registered here, in two parallel pieces:
@@ -14,13 +15,16 @@ from __future__ import annotations
 from typing import Any, Callable
 
 from app.tools.calculator import CALCULATOR_SCHEMA, calculate
+from app.tools.document_search import DOCUMENT_SEARCH_SCHEMA, search_documents
 
 TOOL_SCHEMAS: list[dict] = [
     CALCULATOR_SCHEMA,
+    DOCUMENT_SEARCH_SCHEMA,
 ]
 
 TOOL_FUNCTIONS: dict[str, Callable[..., Any]] = {
     "calculate": calculate,
+    "search_documents": search_documents,
 }
 
 __all__ = ["TOOL_SCHEMAS", "TOOL_FUNCTIONS"]

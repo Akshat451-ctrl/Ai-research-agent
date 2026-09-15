@@ -15,17 +15,19 @@ branch here - not a rewrite of every agent.
 from __future__ import annotations
 
 import re
-import time
+import time 
 from functools import lru_cache
 from typing import Callable, TypeVar
 
 from google import genai
 from google.genai import errors as genai_errors
 from google.genai import types
+from pydantic import BaseModel, ValidationError
 
 from app.utils.config import Settings, get_settings
 
 T = TypeVar("T")
+M = TypeVar("M", bound=BaseModel)
 
 # How many times to retry a request that failed for a temporary reason.
 MAX_ATTEMPTS = 4
@@ -225,3 +227,39 @@ def extract_text(response: types.GenerateContentResponse) -> str:
 def ask(prompt: str, system: str | None = None) -> str:
     """Send a single prompt to the configured model and return its text reply."""
     return extract_text(generate(prompt, system=system))
+
+
+def ask_json(prompt: str, schema: type[M], system: str | None = None) -> M:
+    """Ask the model for output shaped like `schema`, and return a parsed instance.
+
+    Uses Gemini's structured-output mode: the model is constrained to emit
+    JSON matching the schema. response.parsed already gives a validated
+    instance in the common case; we fall back to parsing response.text by
+    hand for the rare case where the SDK could not auto-parse it.
+    """
+    settings = _require_gemini()
+
+    config = types.GenerateContentConfig(
+        system_instruction=system,
+        response_mime_type="application/json",
+        response_schema=schema,
+    )
+
+    response = _with_retry(
+        lambda: _gemini_client().models.generate_content(
+            model=settings.model,
+            contents=prompt,
+            config=config,
+        ),
+        settings.model,
+    )
+
+    if response.parsed is not None:
+        return response.parsed
+
+    try:
+        return schema.model_validate_json(response.text)
+    except ValidationError as error:
+        raise LLMError(
+            f"Model returned JSON that does not match {schema.__name__}: {error}"
+        ) from error
