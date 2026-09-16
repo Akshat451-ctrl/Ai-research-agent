@@ -26,6 +26,24 @@ class Document:
     source: str          # file name, e.g. "annual_report.pdf"
     page: int | None     # 1-based page number for PDFs, None otherwise
 
+# app/rag/loader.py
+def load_file(path: Path) -> list[Document]:
+    """Load one file by its extension. Used for single-file uploads, where
+    load_documents()'s whole-folder scan would be the wrong shape."""
+    suffix = path.suffix.lower()
+    if suffix not in SUPPORTED_EXTENSIONS:
+        return []
+    return _load_pdf(path) if suffix == ".pdf" else _load_text(path)
+
+
+def load_documents(folder: Path = DOCUMENTS_DIR) -> list[Document]:
+    """Load every supported file in `folder` (not recursive)."""
+    documents: list[Document] = []
+    for path in sorted(folder.iterdir()):
+        documents.extend(load_file(path))
+    return documents
+
+
 
 def _load_pdf(path: Path) -> list[Document]:
     """One Document per non-empty page."""
