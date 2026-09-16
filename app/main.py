@@ -2,6 +2,15 @@
 
 from __future__ import annotations
 
+import sys
+
+# Windows consoles often default to a legacy codepage (e.g. cp1252) that
+# cannot render characters like the Rupee sign. Force UTF-8 so model output
+# containing such characters never crashes the run.
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
+
 from app.graph.workflow import build_workflow
 from app.llm import LLMError
 from app.utils.config import ConfigError, get_settings
