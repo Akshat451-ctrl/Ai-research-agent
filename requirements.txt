@@ -13,4 +13,8 @@ chromadb
 
 # Extracts text from PDF files
 pypdf
+# python-dotenv, google-genai, langgraph, chromadb, pypdf already listed above
+
+# Web search - no API key needed
+ddgs
 
