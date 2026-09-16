@@ -17,4 +17,10 @@ pypdf
 
 # Web search - no API key needed
 ddgs
+# Web search - no API key needed
+ddgs
+
+# API layer - exposes the workflow over HTTP
+fastapi
+uvicorn
 
